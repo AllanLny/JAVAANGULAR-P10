@@ -58,13 +58,27 @@ jobs:
         cd front
         npm run test -- --watch=false --browsers=ChromeHeadless
 
+  sonarqube:
+    name: SonarQube
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
   validation:
     name: Validation PR
-    needs: [backend-tests, frontend-tests]
+    needs: [backend-tests, frontend-tests, sonarqube]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     
     steps:
     - name: Validation réussie
       run: |
-        echo "Tous les tests sont passés! La PR peut être mergée."
+        echo "✅ Tous les tests et l'analyse qualité sont passés! La PR peut être mergée."
