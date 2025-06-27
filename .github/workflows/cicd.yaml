@@ -22,7 +22,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         java-version: '11'
-        distribution: 'temurin'
+        distribution: 'microsoft'
         
     - name: Cache des dépendances Maven
       uses: actions/cache@v3
@@ -44,6 +44,7 @@ jobs:
           back/target/site/jacoco/
           back/target/surefire-reports/
           back/target/classes/
+          back/target/test-classes/
         retention-days: 1
 
   frontend-tests:
@@ -89,6 +90,26 @@ jobs:
         with:
           fetch-depth: 0
           
+      - name: Configuration JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'microsoft'
+          
+      - name: Configuration Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+          
+      - name: Cache des dépendances Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
       - name: Download des rapports backend
         uses: actions/download-artifact@v4
         with:
@@ -100,6 +121,11 @@ jobs:
         with:
           name: frontend-reports
           path: front/coverage/
+          
+      - name: Installation des dépendances
+        run: |
+          cd back && mvn clean compile
+          cd ../front && npm ci
           
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
