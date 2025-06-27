@@ -37,7 +37,7 @@ jobs:
         mvn clean verify jacoco:report
         
     - name: Upload des rapports backend
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-reports
         path: |
@@ -74,7 +74,7 @@ jobs:
         npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
         
     - name: Upload des rapports frontend
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-reports
         path: front/coverage/
@@ -90,13 +90,13 @@ jobs:
           fetch-depth: 0
           
       - name: Download des rapports backend
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend-reports
           path: back/target/
           
       - name: Download des rapports frontend
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frontend-reports
           path: front/coverage/
