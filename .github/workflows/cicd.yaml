@@ -1,0 +1,70 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    name: Tests Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+      
+    - name: Configuration JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'microsoft'
+        
+    - name: Cache des dépendances Maven
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Exécution des tests backend
+      run: |
+        cd back
+        mvn clean test
+
+  frontend-tests:
+    name: Tests Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+      
+    - name: Configuration Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: front/package-lock.json
+        
+    - name: Installation des dépendances frontend
+      run: |
+        cd front
+        npm ci
+        
+    - name: Exécution des tests frontend
+      run: |
+        cd front
+        npm run test -- --watch=false --browsers=ChromeHeadless
+
+  validation:
+    name: Validation PR
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Validation réussie
+      run: |
+        echo "Tous les tests sont passés! La PR peut être mergée."
