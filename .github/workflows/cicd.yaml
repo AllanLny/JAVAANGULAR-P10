@@ -62,7 +62,6 @@ jobs:
       run: |
         cd front
         npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-
   sonarqube:
     name: SonarQube
     needs: [backend-tests, frontend-tests]
@@ -70,38 +69,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-          
-      - name: Configuration JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          
-      - name: Configuration Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: front/package-lock.json
-          
-      - name: Cache des dépendances Maven
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-          
-      - name: Préparation des artefacts pour l'analyse
-        run: |
-          cd back && mvn clean verify jacoco:report
-          cd ../front && npm ci && npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+          fetch-depth: 0
           
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   validation:
     name: Validation PR
     needs: [backend-tests, frontend-tests, sonarqube]
@@ -111,4 +84,4 @@ jobs:
     steps:
     - name: Validation réussie
       run: |
-        echo "Tous les tests et l'analyse qualité sont passés! La PR peut être mergée."
+        echo "✅ Tous les tests et l'analyse qualité sont passés! La PR peut être mergée."
