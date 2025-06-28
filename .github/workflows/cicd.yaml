@@ -124,7 +124,7 @@ jobs:
           
       - name: Installation des dépendances
         run: |
-          cd back && mvn clean compile
+          cd back && mvn clean compile test-compile
           cd ../front && npm ci
           
       - name: SonarQube Scan
