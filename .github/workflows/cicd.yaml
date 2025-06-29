@@ -80,7 +80,7 @@ jobs:
         name: frontend-reports
         path: front/coverage/
         retention-days: 1
-
+        
   sonarqube:
     name: SonarQube
     needs: [backend-tests, frontend-tests]
@@ -89,26 +89,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: Configuration JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-          
-      - name: Configuration Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: front/package-lock.json
-          
-      - name: Cache des dépendances Maven
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
           
       - name: Download des rapports backend
         uses: actions/download-artifact@v4
@@ -122,16 +102,10 @@ jobs:
           name: frontend-reports
           path: front/coverage/
           
-      - name: Installation des dépendances
-        run: |
-          cd back && mvn clean compile test-compile
-          cd ../front && npm ci
-          
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
   validation:
     name: Validation PR
     needs: [backend-tests, frontend-tests, sonarqube]
